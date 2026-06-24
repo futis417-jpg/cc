@@ -30,6 +30,25 @@ from telegram.request import HTTPXRequest
 
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, DateTime, Float, Text, func
 from sqlalchemy.orm import declarative_base, sessionmaker
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# Servidor auxiliar para el plan gratuito de Render
+class CheckerHealthHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"CC Checker Bot is Active and Running smoothly!")
+    def log_message(self, format, *args):
+        return # Silenciar logs en la consola de Render
+
+def start_checker_web_server():
+    # Render asigna el puerto automáticamente en esta variable
+    port = int(os.getenv("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), CheckerHealthHandler)
+    print(f"🌍 Servidor de salud HTTP activo en el puerto {port}")
+    server.serve_forever()
 
 load_dotenv()
 
@@ -3488,4 +3507,12 @@ async def save_multi_gateway_results(cc, mm, yy, cvv, all_results, bin_info, par
     shutil.rmtree(folder)
     
     return zip_file
+    # Bloque de inicio automático para Render
+if __name__ == "__main__":
+    # Arrancamos el servidor web en segundo plano
+    web_thread = threading.Thread(target=start_checker_web_server, daemon=True)
+    web_thread.start()
+    
+    # Ejecutamos el bot principal
+    run_bot()
 
