@@ -1,0 +1,6 @@
+python-telegram-bot==20.8
+requests==2.31.0
+python-dotenv==1.0.1
+urllib3==2.0.7
+SQLAlchemy==2.0.25
+beautifulsoup4==4.12.3
